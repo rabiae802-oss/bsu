@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard - Beni Suef University</title>
+    <link rel="stylesheet" href="../style/admin.css">
+    <link rel="stylesheet" href="../css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M825SRFBFW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M825SRFBFW');
+    </script>
+</head>
+<body>
+
+    <div id="loading-spinner" class="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <header class="admin-header">
+        <div class="brand-area">
+            <i class="fas fa-university brand-icon"></i>
+            <h1 class="brand-text">Dashboard</h1>
+        </div>
+        <div class="header-actions">
+            <div class="search-wrapper">
+                <input type="number" id="search-input" placeholder="Seat No..." class="search-input">
+                <button id="search-btn" class="icon-btn search-trigger"><i class="fas fa-search"></i></button>
+            </div>
+            <button id="profile-trigger" class="icon-btn profile-trigger"><i class="fas fa-user-shield"></i></button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        
+        <div id="dashboard-home" class="dashboard-grid">
+            <div class="control-card" id="card-general-schedule">
+                <div class="icon-wrapper color-1"><i class="fas fa-calendar-alt"></i></div>
+                <h3>General Schedule</h3>
+                <p>Deploy one schedule for everyone</p>
+                <button class="action-btn">Edit & Deploy <i class="fas fa-edit"></i></button>
+            </div>
+
+            <div class="control-card" id="card-add-student">
+                <div class="icon-wrapper color-2"><i class="fas fa-user-plus"></i></div>
+                <h3>Add New Student</h3>
+                <p>Register a student to the system</p>
+                <button class="action-btn">Add <i class="fas fa-plus"></i></button>
+            </div>
+
+            <div class="control-card" id="card-list-students">
+                <div class="icon-wrapper color-3"><i class="fas fa-users"></i></div>
+                <h3>Students List</h3>
+                <p>View, Search, and Delete</p>
+                <button class="action-btn">View All <i class="fas fa-list"></i></button>
+            </div>
+        </div>
+
+        <div id="student-editor" class="editor-section" style="display: none;">
+            <div class="editor-top-bar">
+                <h2><i class="fas fa-user-pen"></i> Manage Student Data</h2>
+                <button id="back-to-dash" class="back-btn"><i class="fas fa-times"></i> Close Editor</button>
+            </div>
+
+            <div class="data-group">
+                <h3 class="group-title">Basic Information</h3>
+                <div class="inputs-grid">
+                    <div class="input-container"><label>Name</label><div class="field-row"><input type="text" id="edit-name" disabled><button class="unlock-btn" onclick="toggleEdit('edit-name')"><i class="fas fa-pen"></i></button></div></div>
+                    <div class="input-container"><label>Seat No</label><div class="field-row"><input type="number" id="edit-seat" disabled><button class="unlock-btn" onclick="toggleEdit('edit-seat')"><i class="fas fa-pen"></i></button></div></div>
+                    <div class="input-container"><label>National ID</label><div class="field-row"><input type="number" id="edit-nid" disabled><button class="unlock-btn" onclick="toggleEdit('edit-nid')"><i class="fas fa-pen"></i></button></div></div>
+                    <div class="input-container"><label>Department</label><div class="field-row"><input type="text" id="edit-dept" disabled><button class="unlock-btn" onclick="toggleEdit('edit-dept')"><i class="fas fa-pen"></i></button></div></div>
+                </div>
+            </div>
+
+            <div class="tables-area">
+                <div class="data-group">
+                    <h3 class="group-title">Exam Schedule</h3>
+                    <div class="table-scroll"><table class="edit-table"><thead><tr><th>Subject</th><th>Day</th><th>Date</th><th>Time</th><th></th></tr></thead><tbody id="edit-exam-body"></tbody></table></div>
+                    <button class="add-btn" onclick="addExamRow('edit-exam-body')">+ Subject</button>
+                </div>
+                <div class="data-group">
+                    <h3 class="group-title">Grades</h3>
+                    <div class="table-scroll"><table class="edit-table"><thead><tr><th>Subject</th><th>Max</th><th>Degree</th><th>Grade</th><th></th></tr></thead><tbody id="edit-grades-body"></tbody></table></div>
+                    <button class="add-btn" onclick="addGradeRow('edit-grades-body')">+ Grade</button>
+                </div>
+            </div>
+
+            <div class="floating-actions dual-actions">
+                <button id="delete-student-btn" class="delete-btn-main"><i class="fas fa-trash"></i> Delete Student</button>
+                <button id="save-changes-btn" class="save-btn-main"><i class="fas fa-save"></i> Save Changes</button>
+                <input type="hidden" id="current-student-id">
+            </div>
+        </div>
+    </main>
+
+    <div id="add-student-modal" class="overlay-full">
+        <div class="modal-content-large">
+            <div class="modal-header">
+                <h2>Add New Student</h2>
+                <button class="close-overlay-btn" onclick="closeModal('add-student-modal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="inputs-grid">
+                    <div class="input-container"><label>Full Name</label><input type="text" id="new-name" class="main-input"></div>
+                    <div class="input-container"><label>Seat Number</label><input type="number" id="new-seat" class="main-input"></div>
+                    <div class="input-container"><label>National ID</label><input type="number" id="new-nid" class="main-input"></div>
+                    <div class="input-container"><label>Department</label><input type="text" id="new-dept" class="main-input"></div>
+                </div>
+                
+                <div class="tables-area mt-20">
+                    <div class="data-group">
+                        <h3 class="group-title">Exam Schedule (Optional)</h3>
+                        <div class="table-scroll"><table class="edit-table"><thead><tr><th>Subject</th><th>Day</th><th>Date</th><th>Time</th><th></th></tr></thead><tbody id="new-exam-body"></tbody></table></div>
+                        <button class="add-btn" onclick="addExamRow('new-exam-body')">+ Subject</button>
+                    </div>
+                    <div class="data-group">
+                        <h3 class="group-title">Grades (Optional)</h3>
+                        <div class="table-scroll"><table class="edit-table"><thead><tr><th>Subject</th><th>Max</th><th>Degree</th><th>Grade</th><th></th></tr></thead><tbody id="new-grades-body"></tbody></table></div>
+                        <button class="add-btn" onclick="addGradeRow('new-grades-body')">+ Grade</button>
+                    </div>
+                </div>
+                
+                <button id="confirm-add-student" class="action-btn-primary mt-20">Confirm & Add <i class="fas fa-check"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="general-schedule-modal" class="overlay-full">
+        <div class="modal-content-large">
+            <div class="modal-header">
+                <h2>General Exam Schedule</h2>
+                <button class="close-overlay-btn" onclick="closeModal('general-schedule-modal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-box warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Warning: Saving here will delete individual schedules for all students and replace them with this one.</p>
+                </div>
+                <div class="data-group">
+                    <div class="table-scroll"><table class="edit-table"><thead><tr><th>Subject</th><th>Day</th><th>Date</th><th>Time</th><th></th></tr></thead><tbody id="general-exam-body"></tbody></table></div>
+                    <button class="add-btn" onclick="addExamRow('general-exam-body')">+ Add Subject</button>
+                </div>
+                <button id="confirm-general-schedule" class="action-btn-primary mt-20 bg-warning">Deploy to All <i class="fas fa-bullhorn"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="student-list-modal" class="overlay-full">
+        <div class="modal-content-large full-height">
+            <div class="modal-header">
+                <div class="title-with-badge">
+                    <h2>Students List</h2>
+                    <span id="total-students-count" class="counter-badge">0 Student</span>
+                </div>
+                <div class="header-tools">
+                    <button id="delete-all-btn" class="delete-all-icon" title="Delete All Students">
+                        <i class="fas fa-dumpster-fire"></i>
+                    </button>
+                    <button class="close-overlay-btn relative-btn" onclick="closeModal('student-list-modal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="list-search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="list-search-input" placeholder="Search by name or seat number...">
+            </div>
+            
+            <div class="modal-body no-padding">
+                <div id="students-list-container" class="students-list-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-overlay" class="overlay-full">
+        <div class="profile-card">
+            <button id="close-profile" class="close-overlay-btn"><i class="fas fa-times"></i></button>
+            <div class="profile-header"><div class="profile-pic"><i class="fas fa-user-shield"></i></div><h2 id="admin-name-display">Admin</h2></div>
+            <div class="settings-group"><label>Change Password</label><div class="password-row"><input type="password" id="new-password" placeholder="New Password"><button id="change-pass-btn" class="change-btn">Change</button></div></div>
+            <button id="logout-btn" class="logout-btn-full"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="overlay-full" style="z-index: 9999;">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2>Confirmation</h2>
+                <p id="confirm-msg-text" style="color: #666; margin-top: 10px;">Are you sure?</p>
+            </div>
+            <div class="floating-actions" style="position: static; box-shadow: none; margin-top: 20px;">
+                <button id="confirm-yes-btn" class="save-btn-main">Yes</button>
+                <button id="confirm-no-btn" class="delete-btn-main">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-notification" class="toast"><i id="toast-icon" class="fas fa-check"></i><span id="toast-msg">Done</span></div>
+
+    <script src="../js/node.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portal - Student Dashboard</title>
+    <link rel="stylesheet" href="../style/student.css">
+    <link rel="stylesheet" href="../css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../libs/html2pdf.bundle.min.js"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M825SRFBFW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M825SRFBFW');
+    </script>
+</head>
+<body>
+
+    <div id="loading-spinner" class="loader-container">
+        <div class="spinner"></div>
+        <p>Loading encrypted data...</p>
+    </div>
+
+    <div id="dashboard-content" class="main-layout" style="display: none;">
+        
+        <header class="glass-header">
+            <div class="brand">
+                <i class="fas fa-university"></i>
+                <div class="brand-text">
+                    <h1>Beni Suef University</h1>
+                    <span>Student Services</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="download-trigger" class="header-icon-btn">
+                    <i class="fas fa-file-export"></i>
+                </button>
+                <button id="profile-trigger" class="header-icon-btn">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="container" id="main-report-area">
+            
+            <div id="pdf-personal-info" class="pdf-only-header">
+                <div class="pdf-branding">
+                    <i class="fas fa-university"></i>
+                    <h2>Beni Suef University - Official Student Record</h2>
+                </div>
+                <div class="pdf-info-grid">
+                    <div class="pdf-info-box"><strong>Name:</strong> <span id="pdf-name"></span></div>
+                    <div class="pdf-info-box"><strong>Seat Number:</strong> <span id="pdf-seat"></span></div>
+                    <div class="pdf-info-box"><strong>National ID:</strong> <span id="pdf-nid"></span></div>
+                    <div class="pdf-info-box"><strong>Department:</strong> <span id="pdf-dept"></span></div>
+                </div>
+            </div>
+
+            <div class="welcome-card" id="welcome-section">
+                <div class="welcome-text">
+                    <h2>Welcome, <span id="welcome-name">Student</span> 👋</h2>
+                    <p>We wish you a successful semester. Here is your academic summary.</p>
+                </div>
+            </div>
+
+            <section class="table-section" id="exam-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-calendar-check"></i> Exam Schedule (May 2025)</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Day</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exam-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="table-section" id="grades-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-award"></i> Grades Record</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Max Score</th>
+                                <th>My Score</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="profile-overlay" class="overlay-screen">
+        <div class="overlay-content" id="profile-card-pdf">
+            <button id="close-profile" class="close-btn hide-on-pdf"><i class="fas fa-times"></i></button>
+            
+            <div class="profile-header-area">
+                <div class="profile-avatar-large">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h2 id="modal-full-name">Loading...</h2>
+                <span class="status-badge">Enrolled Student</span>
+            </div>
+
+            <div class="profile-details-grid">
+                <div class="detail-item">
+                    <span class="label"><i class="fas fa-chair"></i> Seat Number</span>
+                    <span class="value" id="modal-seat">---</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label"><i class="fas fa-id-card"></i> National ID</span>
+                    <span class="value" id="modal-nid">---</span>
+                </div>
+                <div class="detail-item full-row">
+                    <span class="label"><i class="fas fa-laptop-code"></i> Department</span>
+                    <span class="value highlight-text" id="modal-dept">---</span>
+                </div>
+            </div>
+
+            <div class="profile-actions hide-on-pdf">
+                <button id="logout-btn" class="action-btn logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="download-overlay" class="overlay-screen">
+        <div class="overlay-content">
+            <button id="close-download" class="close-btn"><i class="fas fa-times"></i></button>
+            <div class="profile-header-area">
+                <i class="fas fa-file-pdf" style="font-size: 45px; color: var(--secondary-blue); margin-bottom: 15px;"></i>
+                <h2>Export Documents</h2>
+                <p>Download your academic data in professional PDF format</p>
+            </div>
+            <div class="download-list">
+                <div class="download-card">
+                    <div class="info">
+                        <strong>Student Profile</strong>
+                        <span>Personal info and academic ID</span>
+                    </div>
+                    <button class="export-btn" onclick="exportToPDF('profile')">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+                <div class="download-card">
+                    <div class="info">
+                        <strong>Exam Schedule</strong>
+                        <span>May 2025 timetable</span>
+                    </div>
+                    <button class="export-btn" onclick="exportToPDF('exams')">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+                <div class="download-card">
+                    <div class="info">
+                        <strong>Academic Grades</strong>
+                        <span>Results and performance record</span>
+                    </div>
+                    <button class="export-btn" onclick="exportToPDF('grades')">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+                <div class="download-card highlight-card">
+                    <div class="info">
+                        <strong>Complete Report</strong>
+                        <span>All academic data in one page</span>
+                    </div>
+                    <button class="export-btn primary" onclick="exportToPDF('all')">
+                        <i class="fas fa-file-pdf"></i> Download Full Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-logout-modal" class="overlay-screen">
+        <div class="overlay-content" style="max-width: 350px;">
+            <div class="profile-header-area">
+                <h2 style="margin-bottom: 20px;">Logout Confirmation</h2>
+                <p>Are you sure you want to exit?</p>
+            </div>
+            <div class="profile-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="confirm-yes-btn" class="action-btn logout" style="background: var(--primary-blue); color: white; border: none;">Yes</button>
+                <button id="confirm-no-btn" class="action-btn logout">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/node.js"></script>
+    <script src="../js/student.js"></script>
+</body>
+</html>
