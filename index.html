@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beni Suef University - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="style/auth.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M825SRFBFW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M825SRFBFW');
+    </script>
+
+</head>
+<body>
+
+    <main class="login-wrapper">
+        <div class="header-content">
+            <i class="fas fa-university uni-logo"></i>
+            <h1>Beni Suef University</h1>
+            <p class="subtitle">Your digital gateway to university services</p>
+        </div>
+
+        <div class="toggle-area">
+            <button id="btn-student" type="button" class="type-btn active">
+                <i class="fas fa-user-graduate"></i> Student
+            </button>
+            <button id="btn-admin" type="button" class="type-btn">
+                <i class="fas fa-user-tie"></i> Admin
+            </button>
+        </div>
+
+        <div class="forms-container">
+            <form id="student-form" class="auth-form active-form">
+                <div class="field-group">
+                    <label>Student Username</label>
+                    <input type="text" id="student-name" placeholder="Username" value="islam rabea" required>
+                </div>
+                <div class="field-group">
+                    <label>Password</label>
+                    <input type="password" id="student-seat" placeholder="Password" value="12345" required>
+                </div>
+                <button type="submit" class="entry-btn">Login</button>
+            </form>
+
+            <form id="admin-form" class="auth-form">
+                <div class="field-group">
+                    <label>Admin Username</label>
+                    <input type="text" id="admin-name" placeholder="Username" value="islam rabea" required>
+                </div>
+                <div class="field-group">
+                    <label>Password</label>
+                    <input type="password" id="admin-code" placeholder="Password" value="12345" required>
+                </div>
+                <button type="submit" class="entry-btn">Access Dashboard</button>
+            </form>
+        </div>
+
+        <footer class="simple-footer">
+            <p>All Rights Reserved © Beni Suef University</p>
+        </footer>
+    </main>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon-area" id="modal-icon-wrapper">
+                <i id="modal-icon" class="fas fa-check"></i>
+            </div>
+            <h3 id="modal-title">Title</h3>
+            <p id="modal-message">Message content</p>
+            <button id="modal-close-btn">OK</button>
+        </div>
+    </div>
+
+    <script src="js/node.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
